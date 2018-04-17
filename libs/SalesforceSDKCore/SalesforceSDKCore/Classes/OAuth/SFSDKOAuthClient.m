@@ -492,6 +492,10 @@ static Class<SFSDKOAuthClientProvider> _clientProvider = nil;
 
 }
 
+- (void)oauthCoordinator:(SFOAuthCoordinator *)coordinator didBeginNativeAuthenticationWithView:(WKWebView *)view {
+    [SFSDKCoreLogger d:[self class] format:@"oauthCoordinator:didBeginNativeAuthenticationWithView"];
+    self.config.authViewController.oauthView = view;
+}
 
 #pragma mark - SFIdentityCoordinatorDelegate
 - (void)identityCoordinatorRetrievedData:(SFIdentityCoordinator *)coordinator {

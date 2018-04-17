@@ -528,6 +528,8 @@ FOUNDATION_EXTERN NSString * const kSFUserInfoAddlOptionsKey;
 - (BOOL)loginWithCompletion:(nullable SFUserAccountManagerSuccessCallbackBlock)completionBlock
                     failure:(nullable SFUserAccountManagerFailureCallbackBlock)failureBlock;
 
+- (BOOL)loginWithUserName:(NSString *)userName password:(NSString *)password  completionBlock:(SFUserAccountManagerSuccessCallbackBlock)completionBlock failure:(SFUserAccountManagerFailureCallbackBlock)failureBlock viewController:(SFLoginViewController *) viewController;
+
 /**
  Kick off the refresh process for the specified credentials.
  @param credentials SFOAuthCredentials to be refreshed.

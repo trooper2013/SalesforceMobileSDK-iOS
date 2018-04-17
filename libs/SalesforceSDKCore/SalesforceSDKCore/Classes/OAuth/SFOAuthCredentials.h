@@ -211,6 +211,10 @@ typedef NS_ENUM(NSInteger, SFOAuthCredentialsStorageType){
 
 @property (nonatomic, copy, nullable) NSString *authCode;
 
+@property (nonatomic, copy, nullable) NSString *userName;
+
+@property (nonatomic, copy, nullable) NSString *password;
+
 ///---------------------------------------------------------------------------------------
 /// @name Initialization
 ///---------------------------------------------------------------------------------------

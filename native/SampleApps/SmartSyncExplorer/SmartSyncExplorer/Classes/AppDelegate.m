@@ -36,7 +36,7 @@
 #import <SalesforceAnalytics/NSUserDefaults+SFAdditions.h>
 #import <SmartSyncExplorerCommon/SmartSyncExplorerConfig.h>
 #import "IDPLoginNavViewController.h"
-
+#import "NativeLoginViewController.h"
 @interface AppDelegate () <SalesforceSDKManagerDelegate>
 
 /**
@@ -72,7 +72,11 @@
         [SalesforceSDKManager sharedManager].appConfig.oauthScopes = [NSSet setWithArray:config.oauthScopes];
         __weak typeof(self) weakSelf = self;
         [[SalesforceSDKManager sharedManager] addDelegate:self];
-        
+        [SFUserAccountManager sharedInstance].loginHost = @"trooper-developer-edition.na59.force.com/demo";
+        [SFUserAccountManager sharedInstance].loginViewControllerConfig.loginViewControllerCreationBlock = ^SFLoginViewController * _Nonnull{
+            NativeLoginViewController *controller = [[NativeLoginViewController alloc] initWithNibName:nil bundle:nil];
+            return controller;
+        };
         //Uncomment following block to enable IDP Login flow.
         /*
         //scheme of idpAppp

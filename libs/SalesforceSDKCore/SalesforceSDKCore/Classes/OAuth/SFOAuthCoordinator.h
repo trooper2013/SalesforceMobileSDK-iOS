@@ -43,7 +43,7 @@ extern const NSTimeInterval kSFOAuthDefaultTimeout;
  */
 extern NSString * const kSFOAuthErrorDomain;
 
-/** 
+/**
  @enum SFOAuthErrorDomain related error codes
  Constants used by SFOAuthCoordinator to indicate errors in the SFOAuth domain
  */
@@ -120,7 +120,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
  
  Implement this protocol to receive updates from an `SFOAuthCoordinator` instance.
  Use these methods to update your interface and refresh your application once a session restarts.
-
+ 
  @see SFOAuthCoordinator
  */
 @protocol SFOAuthCoordinatorDelegate <NSObject>
@@ -244,7 +244,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
 
 /**
  Sent to notify the delegate that a  authentication code was retrieved during idp flow.
-   @param coordinator The SFOAuthCoordinator instance processing this message.
+ @param coordinator The SFOAuthCoordinator instance processing this message.
  */
 - (void)oauthCoordinatorDidFetchAuthCode:(SFOAuthCoordinator *)coordinator authInfo:(SFOAuthInfo *)authInfo;
 
@@ -252,7 +252,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
 
 /** Sent after authentication has begun and the view parameter is displaying the first page of authentication content.
  
- The delegate will receive this message when the first page of the authentication flow is visible in the view parameter. 
+ The delegate will receive this message when the first page of the authentication flow is visible in the view parameter.
  The receiver should display the view in the implementation of this method.
  
  @warning the view parameter must be added to a superview upon completion of this method or an assert will fail
@@ -263,6 +263,14 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
  @see SFOAuthCoordinator
  */
 - (void)oauthCoordinator:(SFOAuthCoordinator *)coordinator didBeginAuthenticationWithView:(WKWebView *)view;
+
+
+
+- (void)oauthCoordinator:(SFOAuthCoordinator *)coordinator willBeginNativeAuthenticationWithView:(WKWebView *)view;
+
+
+- (void)oauthCoordinator:(SFOAuthCoordinator *)coordinator didBeginNativeAuthenticationWithView:(WKWebView *)view;
+
 
 /** Sent after VC has been initialized with authentication URL.
  
@@ -277,7 +285,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
 
 /**
  Sent to notify the delegate that a browser authentication flow was cancelled out of by the user.
-
+ 
  @param coordinator   The SFOAuthCoordinator instance processing this message.
  */
 - (void)oauthCoordinatorDidCancelBrowserAuthentication:(SFOAuthCoordinator *)coordinator;
@@ -291,8 +299,8 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
  the coordinator instance extracts the necessary session information from the response
  and updates the `SFOAuthCredentials` object as necessary.
  
- @warning This class requires the following dependencies: 
- the Security framework and either the NSJSONSerialization iOS 5.0 SDK class 
+ @warning This class requires the following dependencies:
+ the Security framework and either the NSJSONSerialization iOS 5.0 SDK class
  or the third party SBJsonParser class.
  */
 @interface SFOAuthCoordinator : NSObject <WKNavigationDelegate, WKUIDelegate, SFSafariViewControllerDelegate> {
@@ -300,7 +308,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
 
 /** User credentials to use within the authentication process.
  
- @warning The behavior of this class is undefined if this property is set after `authenticate` has been called and 
+ @warning The behavior of this class is undefined if this property is set after `authenticate` has been called and
  authentication has started.
  @warning This property must not be `nil` at the time the `authenticate` method is called or an exception will be raised.
  
@@ -308,8 +316,8 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
  */
 @property (nonatomic, strong, nullable) SFOAuthCredentials *credentials;
 
-/** The delegate object for this coordinator. 
-
+/** The delegate object for this coordinator.
+ 
  The delegate is sent messages at different stages of the authentication process.
  
  @see SFOAuthCoordinatorDelegate
@@ -317,7 +325,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
 @property (nonatomic, weak) id<SFOAuthCoordinatorDelegate> delegate;
 
 /** A set of scopes for OAuth.
- See: 
+ See:
  https://help.salesforce.com/apex/HTViewHelpDoc?language=en&id=remoteaccess_oauth_scopes.htm
  
  Generally you need not specify this unless you are using something other than the "api" scope.
@@ -379,6 +387,7 @@ typedef void (^SFOAuthBrowserFlowCallbackBlock)(BOOL);
  https://community.force.com/services/oauth2/authorize/<brand>?response_type=code&...
  */
 @property (nonatomic, copy) NSString *brandLoginPath;
+@property (nonatomic, assign) BOOL nativeLogin;
 
 ///---------------------------------------------------------------------------------------
 /// @name Initialization

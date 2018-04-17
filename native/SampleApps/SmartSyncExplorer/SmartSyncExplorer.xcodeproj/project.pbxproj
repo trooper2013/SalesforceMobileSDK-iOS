@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 49;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -47,6 +47,8 @@
 		82D0AC131C49A7F60081F833 /* SmartStore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 82D0AB9A1C49A6FB0081F833 /* SmartStore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		82D0AC161C49A8120081F833 /* SmartSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 829DA25D1C1260960040F5F1 /* SmartSync.framework */; };
 		82D0AC171C49A8120081F833 /* SmartSync.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 829DA25D1C1260960040F5F1 /* SmartSync.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B70B93C820864D7B008C0245 /* NativeLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B70B93C620864D7B008C0245 /* NativeLoginViewController.m */; };
+		B70B93C920864D7B008C0245 /* NativeLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B70B93C720864D7B008C0245 /* NativeLoginViewController.xib */; };
 		B7168F2D1FACC1F100A48DB5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7168F2C1FACC1F100A48DB5 /* LaunchScreen.storyboard */; };
 		B71E61B51D9AD4990065FD4E /* SmartSyncExplorerConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = B71E61B31D9AD4990065FD4E /* SmartSyncExplorerConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B71E61B61D9AD4990065FD4E /* SmartSyncExplorerConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = B71E61B41D9AD4990065FD4E /* SmartSyncExplorerConfig.m */; };
@@ -468,6 +470,9 @@
 		82D0AB921C49A6FB0081F833 /* SmartStore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SmartStore.xcodeproj; path = ../../../libs/SmartStore/SmartStore.xcodeproj; sourceTree = "<group>"; };
 		82D0ABBB1C49A7540081F833 /* SalesforceSDKCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SalesforceSDKCore.xcodeproj; path = ../../../libs/SalesforceSDKCore/SalesforceSDKCore.xcodeproj; sourceTree = "<group>"; };
 		82D0ABCE1C49A7710081F833 /* Lumberjack.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Lumberjack.xcodeproj; path = ../../../external/CocoaLumberjack/Lumberjack.xcodeproj; sourceTree = "<group>"; };
+		B70B93C520864D7B008C0245 /* NativeLoginViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeLoginViewController.h; sourceTree = "<group>"; };
+		B70B93C620864D7B008C0245 /* NativeLoginViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeLoginViewController.m; sourceTree = "<group>"; };
+		B70B93C720864D7B008C0245 /* NativeLoginViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NativeLoginViewController.xib; sourceTree = "<group>"; };
 		B7168F2C1FACC1F100A48DB5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ../../../../shared/resources/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B71E61B31D9AD4990065FD4E /* SmartSyncExplorerConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SmartSyncExplorerConfig.h; sourceTree = "<group>"; };
 		B71E61B41D9AD4990065FD4E /* SmartSyncExplorerConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SmartSyncExplorerConfig.m; sourceTree = "<group>"; };
@@ -657,6 +662,9 @@
 				8284055519EA09E40079AB60 /* ContactDetailViewController.m */,
 				820C8B3019E60BDE00E9BE5C /* ContactListViewController.h */,
 				820C8B3119E60BDE00E9BE5C /* ContactListViewController.m */,
+				B70B93C520864D7B008C0245 /* NativeLoginViewController.h */,
+				B70B93C620864D7B008C0245 /* NativeLoginViewController.m */,
+				B70B93C720864D7B008C0245 /* NativeLoginViewController.xib */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -1295,6 +1303,7 @@
 				827C631F19E6018C00027484 /* InfoPlist.strings in Resources */,
 				B7168F2D1FACC1F100A48DB5 /* LaunchScreen.storyboard in Resources */,
 				4F941E951F8C43370035EB03 /* userstore.json in Resources */,
+				B70B93C920864D7B008C0245 /* NativeLoginViewController.xib in Resources */,
 				B7BAD7351FBB7DC30046629F /* IDPLoginViewController.xib in Resources */,
 				4FADBCB51BA0CEDA00D01855 /* ImagesSmartSyncExplorer.xcassets in Resources */,
 			);
@@ -1356,6 +1365,7 @@
 				8284055619EA09E40079AB60 /* ContactDetailViewController.m in Sources */,
 				820C8B3219E60BDE00E9BE5C /* ContactListViewController.m in Sources */,
 				827C632119E6018C00027484 /* main.m in Sources */,
+				B70B93C820864D7B008C0245 /* NativeLoginViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

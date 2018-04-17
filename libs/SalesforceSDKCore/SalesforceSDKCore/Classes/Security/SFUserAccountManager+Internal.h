@@ -100,6 +100,10 @@
 - (SFOAuthCredentials *_Nonnull)newClientCredentials;
 
 /**
+ * @return SFOAuthCredentials
+ */
+- (SFOAuthCredentials *_Nonnull)newUserNamePasswordCredentials:(NSString *_Nonnull)userName password:(NSString *_Nonnull) password;
+/**
  * @param userIdentity to use for encoding to String
  * @return NSString userid:orgid
  */

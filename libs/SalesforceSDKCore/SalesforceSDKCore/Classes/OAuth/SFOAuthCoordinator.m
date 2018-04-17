@@ -1,4 +1,4 @@
-/*
+    /*
  Copyright (c) 2011-present, salesforce.com, inc. All rights reserved.
  
  Redistribution and use of this software in source and binary forms, with or without modification,
@@ -43,7 +43,6 @@
 #import "SFNetwork.h"
 #import "NSURL+SFAdditions.h"
 #import <SalesforceAnalytics/NSUserDefaults+SFAdditions.h>
-
 // Public constants
 
 const NSTimeInterval kSFOAuthDefaultTimeout                     = 120.0; // seconds
@@ -53,7 +52,7 @@ NSString * const     kSFOAuthErrorDomain                        = @"com.salesfor
 
 static NSString * const kSFOAuthEndPointAuthorize               = @"/services/oauth2/authorize";    // user agent flow
 static NSString * const kSFOAuthEndPointToken                   = @"/services/oauth2/token";        // token refresh flow
-
+static NSString * const kSFOAuthEndPointEmbeddedLogin           = @"/servlet/servlet.loginwidgetcontroller";
 // Advanced auth constants
 static NSUInteger const kSFOAuthCodeVerifierByteLength          = 128;
 static NSString * const kSFOAuthCodeVerifierParamName           = @"code_verifier";
@@ -96,10 +95,10 @@ static NSString * const kSFOAuthResponseClientSecret            = @"client_secre
 static NSString * const kSFOAuthErrorTypeMalformedResponse          = @"malformed_response";
 static NSString * const kSFOAuthErrorTypeAccessDenied               = @"access_denied";
 static NSString * const KSFOAuthErrorTypeInvalidClientId            = @"invalid_client_id"; // invalid_client_id:'client identifier invalid'
-                                                                                            // this may be returned when the refresh token is revoked
-                                                                                            // TODO: needs clarification
+// this may be returned when the refresh token is revoked
+// TODO: needs clarification
 static NSString * const kSFOAuthErrorTypeInvalidClient              = @"invalid_client";    // invalid_client:'invalid client credentials'
-                                                                                            // this is returned when refresh token is revoked
+// this is returned when refresh token is revoked
 static NSString * const kSFOAuthErrorTypeInvalidClientCredentials   = @"invalid_client_credentials"; // this is documented but hasn't been witnessed
 static NSString * const kSFOAuthErrorTypeInvalidGrant               = @"invalid_grant";
 static NSString * const kSFOAuthErrorTypeInvalidRequest             = @"invalid_request";
@@ -156,6 +155,7 @@ static NSString * const kSFECParameter = @"ec";
     if (self) {
         self.oauthCoordinatorFlow = self;
         self.credentials = credentials;
+        _nativeLogin = (self.credentials.userName !=nil);
         self.authenticating = NO;
         _timeout = kSFOAuthDefaultTimeout;
         _view = nil;
@@ -182,18 +182,20 @@ static NSString * const kSFECParameter = @"ec";
     NSAssert(self.credentials.identifier.length > 0, @"credentials.identifier cannot be nil or empty");
     NSAssert(self.credentials.domain.length > 0, @"credentials.domain cannot be nil or empty.");
     NSAssert(nil != self.delegate, @"cannot authenticate with nil delegate");
-
+    
     if (self.authenticating) {
         [SFSDKCoreLogger d:[self class] format:@"%@ Error: authenticate called while already authenticating. Call stopAuthenticating first.", NSStringFromSelector(_cmd)];
         return;
     }
     [SFSDKCoreLogger d:[self class] format:@"%@ authenticating as %@ %@ refresh token on '%@://%@' ...",
-         NSStringFromSelector(_cmd),
-         self.credentials.clientId, (nil == self.credentials.refreshToken ? @"without" : @"with"),
-         self.credentials.protocol, self.credentials.domain];
+     NSStringFromSelector(_cmd),
+     self.credentials.clientId, (nil == self.credentials.refreshToken ? @"without" : @"with"),
+     self.credentials.protocol, self.credentials.domain];
     self.authenticating = YES;
     if (self.credentials.refreshToken) {
         self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeRefresh];
+    } else if (self.nativeLogin) {
+        self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeNativeLogin];
     } else {
         self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeUserAgent];
     }
@@ -221,11 +223,16 @@ static NSString * const kSFECParameter = @"ec";
         switch (self.advancedAuthConfiguration) {
             case SFOAuthAdvancedAuthConfigurationNone: {
                 [self notifyDelegateOfBeginAuthentication];
-                [self.oauthCoordinatorFlow beginUserAgentFlow];
+                if (self.nativeLogin) {
+                    [self.oauthCoordinatorFlow beginNativeLoginFlow];
+                } else {
+                    [self.oauthCoordinatorFlow beginUserAgentFlow];
+                }
+                
                 break;
             }
             case SFOAuthAdvancedAuthConfigurationAllow: {
-
+                
                 /*
                  * If advanced auth mode is allowed, we have to get auth configuration settings
                  * from the org, where available, and initiate advanced auth flows, if configured.
@@ -246,7 +253,7 @@ static NSString * const kSFECParameter = @"ec";
                 break;
             }
             case SFOAuthAdvancedAuthConfigurationRequire: {
-
+                
                 // Advanced auth mode is required. Begin the advanced browser flow.
                 dispatch_async(dispatch_get_main_queue(), ^{
                     __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -257,7 +264,7 @@ static NSString * const kSFECParameter = @"ec";
                 break;
             }
             default: {
-
+                
                 // Unknown advanced auth state.
                 NSError *unknownConfigError = [[self class] errorWithType:kSFOAuthErrorTypeUnknownAdvancedAuthConfig
                                                               description:[NSString stringWithFormat:@"Unknown advanced auth config: %lu", (unsigned long)self.advancedAuthConfiguration]];
@@ -294,14 +301,14 @@ static NSString * const kSFECParameter = @"ec";
 
 - (BOOL)handleIDPAuthenticationResponse:(NSURL *)appUrlResponse {
     self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeIDP];
-   
+    
     NSString *query = [appUrlResponse query];
     
     if ([query length] == 0) {
         [SFSDKCoreLogger i:[self class] format:@"%@ URL has no query string.", NSStringFromSelector(_cmd)];
         return NO;
     }
-
+    
     NSString *codeVal = [appUrlResponse valueForParameterName:@"code"];
     if ([codeVal length] == 0) {
         [SFSDKCoreLogger i:[self class] format:@"%@ URL has no '%@' parameter value.", NSStringFromSelector(_cmd), kSFOAuthResponseTypeCode];
@@ -317,7 +324,7 @@ static NSString * const kSFECParameter = @"ec";
 }
 
 - (BOOL)handleAdvancedAuthenticationResponse:(NSURL *)appUrlResponse {
-     self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeAdvancedBrowser];
+    self.authInfo = [[SFOAuthInfo alloc] initWithAuthType:SFOAuthTypeAdvancedBrowser];
     NSString *appUrlResponseString = [appUrlResponse absoluteString];
     if (![[appUrlResponseString lowercaseString] hasPrefix:[self.credentials.redirectUri lowercaseString]]) {
         [SFSDKCoreLogger i:[self class] format:@"%@ URL does not match redirect URI.", NSStringFromSelector(_cmd)];
@@ -351,8 +358,6 @@ static NSString * const kSFECParameter = @"ec";
         config.processPool = SFSDKWebViewStateManager.sharedProcessPool;
         _view = [[WKWebView alloc] initWithFrame:[[UIScreen mainScreen] bounds] configuration:config];
         _view.navigationDelegate = self;
-        _view.autoresizesSubviews = YES;
-        _view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         _view.UIDelegate = self;
     }
     return _view;
@@ -460,6 +465,28 @@ static NSString * const kSFECParameter = @"ec";
     [self.delegate oauthCoordinator:self didBeginAuthenticationWithSafariViewController:svc];
 }
 
+- (void)beginNativeLoginFlow {
+    if (self.credentials.userName!=nil) {
+        if ([self.delegate respondsToSelector:@selector(oauthCoordinator:didBeginNativeAuthenticationWithView:)]) {
+            [self.delegate oauthCoordinator:self didBeginNativeAuthenticationWithView:self.view];
+        }
+        
+        [self continueNativeLoginFlow];
+    }
+}
+
+-  (void)continueNativeLoginFlow {
+    __weak typeof(self) weakSelf = self;
+    [SFSDKAuthConfigUtil getMyDomainAuthConfig:^(SFOAuthOrgAuthConfiguration *authConfig, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            // https://trooper-developer-edition.na59.force.com/demo/servlet/servlet.loginwidgetcontroller
+            [strongSelf loadFrontDoorIntoWebView];
+        });
+        
+    } oauthCredentials:self.credentials];
+}
+
 - (void)beginUserAgentFlow {
     
     if (![NSThread isMainThread]) {
@@ -470,7 +497,7 @@ static NSString * const kSFECParameter = @"ec";
     }
     
     [self configureWebUserAgent];
-
+    
     self.initialRequestLoaded = NO;
     
     // notify delegate will be begin authentication in our (web) vew
@@ -502,15 +529,15 @@ static NSString * const kSFECParameter = @"ec";
         json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
         if (jsonError != nil) {
             NSError *error = [[self class] errorWithType:kSFOAuthErrorTypeJWTLaunchFailed
-                                                 description:@"Error parsing JWT token exchange response."
-                                             underlyingError:jsonError];
-                [self notifyDelegateOfFailure:error authInfo:self.authInfo];
+                                             description:@"Error parsing JWT token exchange response."
+                                         underlyingError:jsonError];
+            [self notifyDelegateOfFailure:error authInfo:self.authInfo];
             return;
         }
         if (![json isKindOfClass:[NSDictionary class]]) {
             NSString *errorDesc = [NSString stringWithFormat:@"Expected NSDictionary for JWT token response, received %@ instance.", NSStringFromClass([json class])];
-                NSError *error = [[self class] errorWithType:kSFOAuthErrorTypeJWTLaunchFailed
-                                                 description:errorDesc];
+            NSError *error = [[self class] errorWithType:kSFOAuthErrorTypeJWTLaunchFailed
+                                             description:errorDesc];
             [self notifyDelegateOfFailure:error authInfo:self.authInfo];
             return;
         }
@@ -652,15 +679,15 @@ static NSString * const kSFECParameter = @"ec";
 }
 
 /* Handle a 'token' endpoint (e.g. refresh, advanced auth) response.
-    Example response:
-    { "id":"https://login.salesforce.com/id/00DD0000000FH54SBH/005D0000001GZXmIAO",
-      "issued_at":"1309481030001",
-      "instance_url":"https://na1.salesforce.com",
-      "signature":"YEguoQhgIvJ3apLALB93vRsq/pUxwG2klsyHp9zX9Wg=",
-      "access_token":"00DD0000000FH84!AQwAQKS7WDhWO9k6YrhbiWBZiDAZC5RzN2dpleOKGKf5dFsatyAN8kck7mtrNvxRGIgN.wE.Z0ZN_No7h6HNqrq828nL6E2J" }
-    
-    Example error response:
-        { "error":"invalid_grant","error_description":"authentication failure - Invalid Password" }
+ Example response:
+ { "id":"https://login.salesforce.com/id/00DD0000000FH54SBH/005D0000001GZXmIAO",
+ "issued_at":"1309481030001",
+ "instance_url":"https://na1.salesforce.com",
+ "signature":"YEguoQhgIvJ3apLALB93vRsq/pUxwG2klsyHp9zX9Wg=",
+ "access_token":"00DD0000000FH84!AQwAQKS7WDhWO9k6YrhbiWBZiDAZC5RzN2dpleOKGKf5dFsatyAN8kck7mtrNvxRGIgN.wE.Z0ZN_No7h6HNqrq828nL6E2J" }
+ 
+ Example error response:
+ { "error":"invalid_grant","error_description":"authentication failure - Invalid Password" }
  */
 - (void)handleTokenEndpointResponse:(NSMutableData *) data {
     self.responseData = data;
@@ -828,6 +855,83 @@ static NSString * const kSFECParameter = @"ec";
     return approvalUrlString;
 }
 
+- (void)loadFrontDoorIntoWebView {
+    //let postString = "\(typeKey)=\(loginType)&\(usernameKey)=\(username)&\(passwordKey)=\(password)&\(getStartUrlParam())"
+    //let postData = postString.data(using: String.Encoding.utf8, allowLossyConversion: true)
+    
+    //startURL /services/oauth2/authorize?client_id=3MVG9SemV5D80oBc_KK4v07s_v92mNoV_rqHj3eBhQXKe6VmIYjt0AnRlxrJTejXZbv0HJ4DyN5AO60_NXvfW&redirect_uri=https%3A%2F%2Fgetfix.herokuapp.com%2F_callback.html&response_type=token
+    
+    NSData *redirectUriData = [self.credentials.redirectUri dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *startURL = [[NSString stringWithFormat:@"%@?client_id=%@&redirect_uri=%@&response_type=%@",kSFOAuthEndPointAuthorize,self.credentials.clientId,[self.credentials.redirectUri stringByURLEncoding],kSFOAuthResponseTypeToken] stringByURLEncoding];
+    
+
+    
+    
+    NSString *postDataURLEncoded =[NSString stringWithFormat:@"type=login&username=%@&password=%@&startURL=%@",self.credentials.userName,self.credentials.password,startURL];
+    
+    //    let startUrl = "\(oauthStartUrlPath)?\(clientIdKey)=\(SalesforceSDKManager.shared().connectedAppId!)&\(redirectUriKey)=\(getUrlEncodedCallbackUrl())&\(responseTypeKey)=\(tokenType)"
+    //    return urlEncodeQueryString(url: startUrl)
+    
+    
+    NSMutableString *loginURL = [[NSMutableString alloc] initWithFormat:@"%@://%@%@",
+                                 @"https",
+                                 self.credentials.domain,
+                                 kSFOAuthEndPointEmbeddedLogin];
+    
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:loginURL] cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                                       timeoutInterval:self.timeout];
+    
+    NSData *body = [postDataURLEncoded dataUsingEncoding:NSUTF8StringEncoding];
+    [request setHTTPBody:body];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    __weak typeof (self) weakSelf = self;
+    [[self.session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        __strong typeof (weakSelf) strongSelf = weakSelf;
+        NSError *jsonError = nil;
+        
+        if (error) {
+            [strongSelf stopAuthentication];
+            [strongSelf notifyDelegateOfFailure:error authInfo:self.authInfo];
+            return;
+        }
+        
+        id json = nil;
+        json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+        if (jsonError != nil) {
+            NSError *error = [[strongSelf class] errorWithType:kSFOAuthErrorTypeJWTLaunchFailed
+                                                   description:@"Error parsing JWT token exchange response."
+                                               underlyingError:jsonError];
+            [strongSelf notifyDelegateOfFailure:error authInfo:self.authInfo];
+            return;
+        }
+        if (![json isKindOfClass:[NSDictionary class]]) {
+            NSString *errorDesc = [NSString stringWithFormat:@"Expected NSDictionary for JWT token response, received %@ instance.", NSStringFromClass([json class])];
+            NSError *error = [[strongSelf class] errorWithType:kSFOAuthErrorTypeJWTLaunchFailed
+                                                   description:errorDesc];
+            [strongSelf notifyDelegateOfFailure:error authInfo:self.authInfo];
+            return;
+        }
+        NSDictionary *dict = (NSDictionary *)json;
+        if (nil != dict[kSFOAuthError]) {
+            NSError *error = [[strongSelf class] errorWithType:dict[kSFOAuthError] description:dict[kSFOAuthErrorDescription]];
+            [self notifyDelegateOfFailure:error authInfo:strongSelf.authInfo];
+            return;
+        }
+        NSString *frontDoorUrlString = dict[@"result"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //[strongSelf.view loadRequest:request];
+            
+//            strongSelf.view.frame = [[UIScreen mainScreen] bounds];
+//            strongSelf.view.hidden = NO;
+//            [strongSelf.view.superview setNeedsDisplay];
+            [strongSelf loadWebViewWithUrlString:frontDoorUrlString cookie:YES];
+        });
+    }] resume];
+    
+}
+
 - (NSString *)scopeQueryParamString {
     NSMutableSet *scopes = (self.scopes.count > 0 ? [NSMutableSet setWithSet:self.scopes] : [NSMutableSet set]);
     [scopes addObject:kSFOAuthRefreshToken];
@@ -845,31 +949,31 @@ static NSString * const kSFECParameter = @"ec";
  - communityUrl
  */
 - (void) updateCredentials:(NSDictionary *) params {
-
+    
     if (params[kSFOAuthAccessToken]) {
         [self.credentials setPropertyForKey:@"accessToken" withValue:params[kSFOAuthAccessToken]];
     }
-
+    
     if (params[kSFOAuthIssuedAt]) {
         self.credentials.issuedAt = [[self class] timestampStringToDate:params[kSFOAuthIssuedAt]];
     }
-
+    
     if (params[kSFOAuthInstanceUrl]) {
-         [self.credentials setPropertyForKey:@"instanceUrl" withValue:[NSURL URLWithString:params[kSFOAuthInstanceUrl]]];
+        [self.credentials setPropertyForKey:@"instanceUrl" withValue:[NSURL URLWithString:params[kSFOAuthInstanceUrl]]];
     }
-
+    
     if (params[kSFOAuthId]) {
         [self.credentials setPropertyForKey:@"identityUrl" withValue:[NSURL URLWithString:params[kSFOAuthId]]];
     }
-
+    
     if (params[kSFOAuthCommunityId]) {
         [self.credentials setPropertyForKey:@"communityId" withValue:params[kSFOAuthCommunityId]];
     }
-
+    
     if (params[kSFOAuthCommunityUrl]) {
         [self.credentials setPropertyForKey:@"communityUrl" withValue:[NSURL URLWithString:params[kSFOAuthCommunityUrl]]];
     }
-
+    
     // Parse additional flags
     if(self.additionalOAuthParameterKeys.count > 0) {
         NSMutableDictionary * parsedValues = [NSMutableDictionary dictionaryWithCapacity:self.additionalOAuthParameterKeys.count];
@@ -881,7 +985,7 @@ static NSString * const kSFECParameter = @"ec";
         }
         self.credentials.additionalOAuthFields = parsedValues;
     }
-
+    
 }
 
 - (void)configureWebUserAgent
@@ -932,6 +1036,10 @@ static NSString * const kSFECParameter = @"ec";
         _session = network.activeSession;
     }
     return _session;
+}
+
+- (BOOL) nativeLogin {
+    return (self.credentials && self.credentials.userName && self.credentials.password);
 }
 
 #pragma mark - WKNavigationDelegate (User-Agent Token Flow)
@@ -1045,10 +1153,10 @@ static NSString * const kSFECParameter = @"ec";
         // get rid of leading and trailing slash
         if ([urlString hasPrefix:@"/"])
             [urlString deleteCharactersInRange:NSMakeRange(0, 1)];
-
+        
         if ([urlString hasSuffix:@"/"])
             [urlString deleteCharactersInRange:NSMakeRange(urlString.length - 1, 1)];
-
+        
         [brandedAuthorizeURL appendFormat:@"/%@",urlString];
     }
     return brandedAuthorizeURL;
@@ -1119,7 +1227,7 @@ static NSString * const kSFECParameter = @"ec";
     } else if ([type isEqualToString:kSFOAuthErrorTypeJWTLaunchFailed]) {
         code = kSFOAuthErrorJWTInvalidGrant;
     }
-
+    
     NSMutableDictionary *userInfoDict = [NSMutableDictionary dictionaryWithDictionary:@{kSFOAuthError: type,
                                                                                         NSLocalizedDescriptionKey: description}];
     if (underlyingError != nil) {

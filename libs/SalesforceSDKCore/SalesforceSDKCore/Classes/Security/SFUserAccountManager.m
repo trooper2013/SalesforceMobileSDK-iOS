@@ -61,7 +61,6 @@
 #import "SFSDKWindowContainer.h"
 #import "SFSDKIDPConstants.h"
 #import "SFSDKAuthViewHandler.h"
-
 // Notifications
 NSString * const SFUserAccountManagerDidChangeUserNotification       = @"SFUserAccountManagerDidChangeUserNotification";
 NSString * const SFUserAccountManagerDidChangeUserDataNotification   = @"SFUserAccountManagerDidChangeUserDataNotification";
@@ -274,6 +273,19 @@ static NSString *const  kOptionsClientKey          = @"clientIdentifier";
         result = [[SFSDKURLHandlerManager sharedInstance] processRequest:appUrlResponse  options:options];
     }
     return result;
+}
+
+- (BOOL)loginWithUserName:(NSString *)userName password:(NSString *)password
+          completionBlock:(SFUserAccountManagerSuccessCallbackBlock)completionBlock failure:(SFUserAccountManagerFailureCallbackBlock)failureBlock viewController:(SFLoginViewController *) viewController {
+    NSAssert(self.useLegacyAuthenticationManager==false, kSFIncompatibleAuthError);
+    [SFSDKWebViewStateManager removeSession];
+    
+    SFOAuthCredentials *credentials = [self newUserNamePasswordCredentials:userName password:password];
+    [SFSDKWebViewStateManager removeSession];
+    SFSDKOAuthClient *client = [self fetchOAuthClient:credentials cached:NO completion:completionBlock failure:failureBlock];
+    client.config.authViewController = viewController;
+    [[SFSDKOAuthClientCache sharedInstance] addClient:client];
+    return [client refreshCredentials];
 }
 
 - (BOOL)loginWithCompletion:(SFUserAccountManagerSuccessCallbackBlock)completionBlock failure:(SFUserAccountManagerFailureCallbackBlock)failureBlock {
@@ -659,6 +671,17 @@ static NSString *const  kOptionsClientKey          = @"clientIdentifier";
     creds.redirectUri = self.oauthCompletionUrl;
     creds.domain = self.loginHost;
     creds.accessToken = nil;
+    return creds;
+}
+
+- (SFOAuthCredentials *)newUserNamePasswordCredentials:(NSString *)userName password:(NSString *) password {
+    NSString *identifier = [self uniqueUserAccountIdentifier:self.oauthClientId];
+    SFOAuthCredentials *creds = [[SFOAuthCredentials alloc] initWithIdentifier:identifier clientId:self.oauthClientId encrypted:YES];
+    creds.redirectUri = self.oauthCompletionUrl;
+    creds.domain = self.loginHost;
+    creds.accessToken = nil;
+    creds.userName = userName;
+    creds.password = password;
     return creds;
 }
 

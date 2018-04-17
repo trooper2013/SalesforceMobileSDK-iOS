@@ -41,6 +41,7 @@ typedef NS_ENUM(NSUInteger, SFOAuthTokenEndpointFlow) {
 - (void)beginJwtTokenExchangeFlow;
 - (void)handleTokenEndpointResponse:(NSMutableData *)data;
 - (void)beginNativeBrowserFlow;
+- (void)beginNativeLoginFlow;
 
 @end
 
@@ -58,8 +59,9 @@ typedef NS_ENUM(NSUInteger, SFOAuthTokenEndpointFlow) {
 @property (nonatomic, readwrite) SFOAuthAdvancedAuthState advancedAuthState;
 @property (nonatomic, copy) NSString *origWebUserAgent;
 @property (nonatomic, strong) SFOAuthCredentials *spAppCredentials;
+
 /** UpdateCredentials and record changes to instanceUrl,accessToken,communityId
-  @param params NV pairs received from token endpoint.
+ @param params NV pairs received from token endpoint.
  */
 - (void) updateCredentials:(NSDictionary *) params;
 

@@ -24,9 +24,10 @@
 
 #import "SmartSyncExplorerConfig.h"
 
-static NSString * const kRemoteAccessConsumerKey = @"3MVG9Iu66FKeHhINkB1l7xt7kR8czFcCTUhgoA8Ol2Ltf1eYHOU4SqQRSEitYFDUpqRWcoQ2.dBv_a1Dyu5xa";
+static NSString * const kRemoteAccessConsumerKey = @"3MVG9zlTNB8o8BA0hXyea5QTe0bQwSvcHdxbxgB9WtIalxYfhq.qX4E5wbNUoSCQQbqxMg6W0sySQLECB9JUn";
+//@"3MVG9Iu66FKeHhINkB1l7xt7kR8czFcCTUhgoA8Ol2Ltf1eYHOU4SqQRSEitYFDUpqRWcoQ2.dBv_a1Dyu5xa";
 
-static NSString * const kOAuthRedirectURI = @"testsfdc:///mobilesdk/detect/oauth/done";
+static NSString * const kOAuthRedirectURI = @"trooper://oauth/done";
 static NSString * const kAppGroupName  = @"group.com.salesforce.mobilesdk.SmartSyncExplorer";
 static NSString * const kUserLoggedIn = @"userLoggedIn";
 
