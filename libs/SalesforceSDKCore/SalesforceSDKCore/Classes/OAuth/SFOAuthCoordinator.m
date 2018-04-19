@@ -856,22 +856,11 @@ static NSString * const kSFECParameter = @"ec";
 }
 
 - (void)loadFrontDoorIntoWebView {
-    //let postString = "\(typeKey)=\(loginType)&\(usernameKey)=\(username)&\(passwordKey)=\(password)&\(getStartUrlParam())"
-    //let postData = postString.data(using: String.Encoding.utf8, allowLossyConversion: true)
-    
-    //startURL /services/oauth2/authorize?client_id=3MVG9SemV5D80oBc_KK4v07s_v92mNoV_rqHj3eBhQXKe6VmIYjt0AnRlxrJTejXZbv0HJ4DyN5AO60_NXvfW&redirect_uri=https%3A%2F%2Fgetfix.herokuapp.com%2F_callback.html&response_type=token
-    
-    NSData *redirectUriData = [self.credentials.redirectUri dataUsingEncoding:NSUTF8StringEncoding];
+   
     NSString *startURL = [[NSString stringWithFormat:@"%@?client_id=%@&redirect_uri=%@&response_type=%@",kSFOAuthEndPointAuthorize,self.credentials.clientId,[self.credentials.redirectUri stringByURLEncoding],kSFOAuthResponseTypeToken] stringByURLEncoding];
     
-
-    
-    
     NSString *postDataURLEncoded =[NSString stringWithFormat:@"type=login&username=%@&password=%@&startURL=%@",self.credentials.userName,self.credentials.password,startURL];
-    
-    //    let startUrl = "\(oauthStartUrlPath)?\(clientIdKey)=\(SalesforceSDKManager.shared().connectedAppId!)&\(redirectUriKey)=\(getUrlEncodedCallbackUrl())&\(responseTypeKey)=\(tokenType)"
-    //    return urlEncodeQueryString(url: startUrl)
-    
+   
     
     NSMutableString *loginURL = [[NSMutableString alloc] initWithFormat:@"%@://%@%@",
                                  @"https",
@@ -921,12 +910,7 @@ static NSString * const kSFECParameter = @"ec";
         }
         NSString *frontDoorUrlString = dict[@"result"];
         dispatch_async(dispatch_get_main_queue(), ^{
-            //[strongSelf.view loadRequest:request];
-            
-//            strongSelf.view.frame = [[UIScreen mainScreen] bounds];
-//            strongSelf.view.hidden = NO;
-//            [strongSelf.view.superview setNeedsDisplay];
-            [strongSelf loadWebViewWithUrlString:frontDoorUrlString cookie:YES];
+           [strongSelf loadWebViewWithUrlString:frontDoorUrlString cookie:YES];
         });
     }] resume];
     
@@ -1080,7 +1064,8 @@ static NSString * const kSFECParameter = @"ec";
     }
     if (!self.initialRequestLoaded) {
         self.initialRequestLoaded = YES;
-        [self.delegate oauthCoordinator:self didBeginAuthenticationWithView:self.view];
+        if (!self.nativeLogin)
+            [self.delegate oauthCoordinator:self didBeginAuthenticationWithView:self.view];
     }
 }
 

@@ -12,6 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NativeLoginViewController">
             <connections>
+                <outlet property="activityIndicator" destination="HY1-MQ-uhF" id="Jp8-Zf-uly"/>
                 <outlet property="passwordTextField" destination="P2k-UP-weI" id="aN2-Rg-UU6"/>
                 <outlet property="userNameTextField" destination="Ipb-9X-9Nv" id="2iz-G5-fAJ"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -22,59 +23,39 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GTc-wC-yM0">
-                    <rect key="frame" x="29" y="145" width="317" height="45"/>
-                    <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="45" id="Nm6-Fh-UGL"/>
-                    </constraints>
-                    <state key="normal" title="Log In Using Identity Provider">
-                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </state>
-                </button>
-                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="rajrao71@gmail.com" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ipb-9X-9Nv">
-                    <rect key="frame" x="29" y="367" width="317" height="30"/>
+                <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="rajrao71@gmail.com" borderStyle="roundedRect" placeholder="Username" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ipb-9X-9Nv">
+                    <rect key="frame" x="29" y="219" width="317" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <nil key="textColor"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" textContentType="username"/>
                 </textField>
-                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="test12345" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P2k-UP-weI">
-                    <rect key="frame" x="29" y="405" width="317" height="30"/>
+                <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="test12345" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P2k-UP-weI">
+                    <rect key="frame" x="29" y="257" width="317" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <nil key="textColor"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                 </textField>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0HJ-38-LGh">
-                    <rect key="frame" x="29" y="452" width="317" height="45"/>
+                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0HJ-38-LGh">
+                    <rect key="frame" x="29" y="317" width="317" height="42"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="45" id="bhS-cX-r7o"/>
-                    </constraints>
-                    <state key="normal" title="Log In Using App">
+                    <state key="normal" title="Login">
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
                         <action selector="nativeLoginAction:" destination="-1" eventType="touchUpInside" id="2IB-qj-m3J"/>
                     </connections>
                 </button>
+                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="HY1-MQ-uhF">
+                    <rect key="frame" x="170" y="243" width="20" height="20"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </activityIndicatorView>
             </subviews>
-            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-            <constraints>
-                <constraint firstItem="GTc-wC-yM0" firstAttribute="trailing" secondItem="Ipb-9X-9Nv" secondAttribute="trailing" id="4t2-AJ-tYy"/>
-                <constraint firstItem="GTc-wC-yM0" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="6j3-kF-ZGO"/>
-                <constraint firstItem="0HJ-38-LGh" firstAttribute="top" secondItem="P2k-UP-weI" secondAttribute="bottom" constant="17" id="CB0-Pq-MuW"/>
-                <constraint firstItem="P2k-UP-weI" firstAttribute="top" secondItem="Ipb-9X-9Nv" secondAttribute="bottom" constant="8" symbolic="YES" id="FOR-n7-QNa"/>
-                <constraint firstItem="Q5M-cg-NOt" firstAttribute="bottom" secondItem="0HJ-38-LGh" secondAttribute="bottom" constant="281" id="H72-p4-vby"/>
-                <constraint firstItem="P2k-UP-weI" firstAttribute="leading" secondItem="0HJ-38-LGh" secondAttribute="leading" id="O1D-vc-3cL"/>
-                <constraint firstItem="Ipb-9X-9Nv" firstAttribute="trailing" secondItem="P2k-UP-weI" secondAttribute="trailing" id="Vgy-Jn-CCQ"/>
-                <constraint firstItem="Ipb-9X-9Nv" firstAttribute="leading" secondItem="P2k-UP-weI" secondAttribute="leading" id="ad9-B0-rzG"/>
-                <constraint firstItem="P2k-UP-weI" firstAttribute="trailing" secondItem="0HJ-38-LGh" secondAttribute="trailing" id="fKd-91-eDZ"/>
-                <constraint firstItem="GTc-wC-yM0" firstAttribute="leading" secondItem="Ipb-9X-9Nv" secondAttribute="leading" id="iSf-kU-yHe"/>
-                <constraint firstItem="GTc-wC-yM0" firstAttribute="leading" secondItem="Q5M-cg-NOt" secondAttribute="leading" constant="29" id="myP-EU-nOR"/>
-                <constraint firstItem="GTc-wC-yM0" firstAttribute="top" secondItem="Q5M-cg-NOt" secondAttribute="top" constant="101" id="uFV-wc-J6f"/>
-            </constraints>
+            <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
             <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
-            <point key="canvasLocation" x="33.5" y="53"/>
+            <point key="canvasLocation" x="260" y="17"/>
         </view>
     </objects>
 </document>

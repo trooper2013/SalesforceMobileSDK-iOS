@@ -121,8 +121,15 @@
             [strongSelf setUserLoginStatus:NO];
             [strongSelf handleUserSwitch:fromUser toUser:toUser];
         };
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAppInit:) name:kSFNotificationUserDidLogIn  object:nil];
+        
     }
     return self;
+}
+
+- (void)handleAppInit:(NSNotification *)notification
+{
+    [self setupRootViewController];
 }
 
 - (void)setUserLoginStatus :(BOOL) loggedIn {

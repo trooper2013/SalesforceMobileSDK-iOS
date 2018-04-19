@@ -11,6 +11,7 @@
 @interface NativeLoginViewController ()
 @property (weak, nonatomic) IBOutlet UITextField *userNameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 - (IBAction)nativeLoginAction:(id)sender;
 
 @end
@@ -21,7 +22,9 @@
 - (void)viewDidLoad {
     UIColor *backGroundColor = self.view.backgroundColor;
     [super viewDidLoad];
+    
     self.view.backgroundColor = backGroundColor;
+    [self.activityIndicator setHidden:YES];
     // Do any additional setup after loading the view from its nib.
 }
 
@@ -85,11 +88,23 @@
 */
 
 - (IBAction)nativeLoginAction:(id)sender {
+    [self.activityIndicator setHidden:NO];
+    [self.activityIndicator startAnimating];
+    
+    __weak typeof (self) weakSelf = self;
     [[SFUserAccountManager sharedInstance] loginWithUserName:self.userNameTextField.text password:self.passwordTextField.text completionBlock:^(SFOAuthInfo * authInfo, SFUserAccount * userAccount) {
-        [SFUserAccountManager sharedInstance].currentUser = userAccount;
-        
+         [SFUserAccountManager sharedInstance].currentUser = userAccount;
+        __weak typeof (weakSelf) strongSelf = weakSelf;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [strongSelf.activityIndicator stopAnimating];
+            [strongSelf.activityIndicator setHidden:YES];
+        });
+       
     } failure:^(SFOAuthInfo * authInfo, NSError * errror) {
+         __weak typeof (weakSelf) strongSelf = weakSelf;
         NSLog(@"failure %@",errror.localizedDescription);
+        [strongSelf.activityIndicator stopAnimating];
+        [strongSelf.activityIndicator setHidden:YES];
     } viewController: self];
 }
 @end
